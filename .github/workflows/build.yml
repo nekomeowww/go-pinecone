@@ -1,5 +1,7 @@
 name: Building
 
+concurrency: ci-build
+
 on:
   push:
     branches:

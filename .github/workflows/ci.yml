@@ -1,5 +1,7 @@
 name: Testing
 
+concurrency: ci-test
+
 on:
   push:
     branches:
