@@ -7,7 +7,7 @@
 
 ---
 
-This package is an API client for Pinecone, a SaaS vector database, using Golang. With this package, users can easily perform Index and Vector data operations in Golang projects.
+This package is an API client for Pinecone, a SaaS vector database. With this package, users can easily perform Index and Vector data operations in Golang projects.
 
 ## Introduction
 
