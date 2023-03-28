@@ -12,236 +12,230 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreateIndex(t *testing.T) {
-	time.Sleep(time.Second * 5)
+func TestIndexOperations(t *testing.T) {
+	t.Run("CreateIndex", func(t *testing.T) {
+		t.Run("Error", func(t *testing.T) {
+			assert := assert.New(t)
+			require := require.New(t)
 
-	t.Run("Error", func(t *testing.T) {
-		assert := assert.New(t)
-		require := require.New(t)
+			c, err := New(
+				WithAPIKey(""),
+				WithEnvironment("us-central1-gcp"),
+			)
+			require.NoError(err)
 
-		c, err := New(
-			WithAPIKey(""),
-			WithEnvironment("us-central1-gcp"),
-		)
-		require.NoError(err)
-
-		err = c.CreateIndex(context.Background(), CreateIndexParams{
-			Name:      "test-index",
-			Dimension: 10,
+			err = c.CreateIndex(context.Background(), CreateIndexParams{
+				Name:      "test-index",
+				Dimension: 10,
+			})
+			require.Error(err)
+			assert.ErrorIs(err, ErrRequestFailed)
+			assert.EqualError(fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, `API key is missing or invalid for the environment "us-central1-gcp". Check that the correct environment is specified.`, 401), err.Error())
 		})
-		require.Error(err)
-		assert.ErrorIs(err, ErrRequestFailed)
-		assert.EqualError(fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, `API key is missing or invalid for the environment "us-central1-gcp". Check that the correct environment is specified.`, 401), err.Error())
-	})
 
-	t.Run("Success", func(t *testing.T) {
-		require := require.New(t)
+		t.Run("Success", func(t *testing.T) {
+			require := require.New(t)
 
-		c, err := New(
-			WithAPIKey(os.Getenv(EnvTestPineconeAPIKey)),
-			WithEnvironment("us-central1-gcp"),
-		)
-		require.NoError(err)
+			c, err := New(
+				WithAPIKey(os.Getenv(EnvTestPineconeAPIKey)),
+				WithEnvironment("us-central1-gcp"),
+			)
+			require.NoError(err)
 
-		err = c.CreateIndex(context.Background(), CreateIndexParams{
-			Name:      "test-index",
-			Dimension: 10,
+			err = c.CreateIndex(context.Background(), CreateIndexParams{
+				Name:      "test-index",
+				Dimension: 10,
+			})
+			require.NoError(err)
 		})
-		require.NoError(err)
-	})
-}
-
-func TestListIndexes(t *testing.T) {
-	time.Sleep(time.Second * 5)
-
-	t.Run("Error", func(t *testing.T) {
-		assert := assert.New(t)
-		require := require.New(t)
-
-		c, err := New(
-			WithAPIKey(""),
-			WithEnvironment("us-central1-gcp"),
-		)
-		require.NoError(err)
-
-		indexes, err := c.ListIndexes()
-		require.Error(err)
-		require.Empty(indexes)
-		assert.ErrorIs(err, ErrRequestFailed)
-		assert.EqualError(fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, `API key is missing or invalid for the environment "us-central1-gcp". Check that the correct environment is specified.`, 401), err.Error())
 	})
 
-	t.Run("Success", func(t *testing.T) {
-		assert := assert.New(t)
-		require := require.New(t)
+	time.Sleep(time.Minute)
 
-		c, err := New(
-			WithAPIKey(os.Getenv(EnvTestPineconeAPIKey)),
-			WithEnvironment("us-central1-gcp"),
-		)
-		require.NoError(err)
+	t.Run("ListIndexes", func(t *testing.T) {
+		t.Run("Error", func(t *testing.T) {
+			assert := assert.New(t)
+			require := require.New(t)
 
-		indexes, err := c.ListIndexes()
-		require.NoError(err)
-		assert.NotNil(indexes)
-		assert.Len(indexes, 1)
-	})
-}
+			c, err := New(
+				WithAPIKey(""),
+				WithEnvironment("us-central1-gcp"),
+			)
+			require.NoError(err)
 
-func TestDescribeIndex(t *testing.T) {
-	time.Sleep(time.Second * 5)
-
-	t.Run("Error", func(t *testing.T) {
-		assert := assert.New(t)
-		require := require.New(t)
-
-		c, err := New(
-			WithAPIKey(""),
-			WithEnvironment("us-central1-gcp"),
-		)
-		require.NoError(err)
-
-		resp, err := c.DescribeIndex(context.Background(), "test-index")
-		require.Error(err)
-		require.Nil(resp)
-		assert.ErrorIs(err, ErrRequestFailed)
-		assert.EqualError(fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, `API key is missing or invalid for the environment "us-central1-gcp". Check that the correct environment is specified.`, 401), err.Error())
-	})
-
-	t.Run("NotFound", func(t *testing.T) {
-		assert := assert.New(t)
-		require := require.New(t)
-
-		c, err := New(
-			WithAPIKey(os.Getenv(EnvTestPineconeAPIKey)),
-			WithEnvironment("us-central1-gcp"),
-		)
-		require.NoError(err)
-
-		resp, err := c.DescribeIndex(context.Background(), fmt.Sprintf("test-index-%d", time.Now().UnixMilli()))
-		require.Error(err)
-		assert.ErrorIs(err, ErrIndexNotFound)
-		assert.Nil(resp)
-	})
-
-	t.Run("Success", func(t *testing.T) {
-		assert := assert.New(t)
-		require := require.New(t)
-
-		c, err := New(
-			WithAPIKey(os.Getenv(EnvTestPineconeAPIKey)),
-			WithEnvironment("us-central1-gcp"),
-		)
-		require.NoError(err)
-
-		resp, err := c.DescribeIndex(context.Background(), "test-index")
-		require.NoError(err)
-		require.NotNil(resp)
-		assert.Equal("test-index", resp.Database.Name)
-	})
-}
-
-func TestConfigureIndex(t *testing.T) {
-	time.Sleep(time.Second * 5)
-
-	t.Run("Error", func(t *testing.T) {
-		assert := assert.New(t)
-		require := require.New(t)
-
-		c, err := New(
-			WithAPIKey(""),
-			WithEnvironment("us-central1-gcp"),
-		)
-		require.NoError(err)
-
-		err = c.ConfigureIndex(context.Background(), ConfigureIndexParams{
-			IndexName: "test-index",
-			Replicas:  mo.Some(2),
+			indexes, err := c.ListIndexes()
+			require.Error(err)
+			require.Empty(indexes)
+			assert.ErrorIs(err, ErrRequestFailed)
+			assert.EqualError(fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, `API key is missing or invalid for the environment "us-central1-gcp". Check that the correct environment is specified.`, 401), err.Error())
 		})
-		require.Error(err)
-		assert.ErrorIs(err, ErrRequestFailed)
-		assert.EqualError(fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, `API key is missing or invalid for the environment "us-central1-gcp". Check that the correct environment is specified.`, 401), err.Error())
-	})
 
-	t.Run("NotFound", func(t *testing.T) {
-		assert := assert.New(t)
-		require := require.New(t)
+		t.Run("Success", func(t *testing.T) {
+			assert := assert.New(t)
+			require := require.New(t)
 
-		c, err := New(
-			WithAPIKey(os.Getenv(EnvTestPineconeAPIKey)),
-			WithEnvironment("us-central1-gcp"),
-		)
-		require.NoError(err)
+			c, err := New(
+				WithAPIKey(os.Getenv(EnvTestPineconeAPIKey)),
+				WithEnvironment("us-central1-gcp"),
+			)
+			require.NoError(err)
 
-		err = c.ConfigureIndex(context.Background(), ConfigureIndexParams{
-			IndexName: fmt.Sprintf("test-index-%d", time.Now().UnixMilli()),
-			Replicas:  mo.Some(2),
+			indexes, err := c.ListIndexes()
+			require.NoError(err)
+			assert.NotNil(indexes)
+			assert.Len(indexes, 1)
 		})
-		require.Error(err)
-		assert.ErrorIs(err, ErrIndexNotFound)
 	})
 
-	t.Run("Success", func(t *testing.T) {
-		require := require.New(t)
+	t.Run("DescribeIndex", func(t *testing.T) {
+		t.Run("Error", func(t *testing.T) {
+			assert := assert.New(t)
+			require := require.New(t)
 
-		c, err := New(
-			WithAPIKey(os.Getenv(EnvTestPineconeAPIKey)),
-			WithEnvironment("us-central1-gcp"),
-		)
-		require.NoError(err)
+			c, err := New(
+				WithAPIKey(""),
+				WithEnvironment("us-central1-gcp"),
+			)
+			require.NoError(err)
 
-		err = c.ConfigureIndex(context.Background(), ConfigureIndexParams{
-			IndexName: "test-index",
-			Replicas:  mo.Some(2),
+			resp, err := c.DescribeIndex(context.Background(), "test-index")
+			require.Error(err)
+			require.Nil(resp)
+			assert.ErrorIs(err, ErrRequestFailed)
+			assert.EqualError(fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, `API key is missing or invalid for the environment "us-central1-gcp". Check that the correct environment is specified.`, 401), err.Error())
 		})
-		require.NoError(err)
-	})
-}
 
-func TestDeleteIndex(t *testing.T) {
-	time.Sleep(time.Second * 5)
+		t.Run("NotFound", func(t *testing.T) {
+			assert := assert.New(t)
+			require := require.New(t)
 
-	t.Run("Error", func(t *testing.T) {
-		assert := assert.New(t)
-		require := require.New(t)
+			c, err := New(
+				WithAPIKey(os.Getenv(EnvTestPineconeAPIKey)),
+				WithEnvironment("us-central1-gcp"),
+			)
+			require.NoError(err)
 
-		c, err := New(
-			WithAPIKey(""),
-			WithEnvironment("us-central1-gcp"),
-		)
-		require.NoError(err)
+			resp, err := c.DescribeIndex(context.Background(), fmt.Sprintf("test-index-%d", time.Now().UnixMilli()))
+			require.Error(err)
+			assert.ErrorIs(err, ErrIndexNotFound)
+			assert.Nil(resp)
+		})
 
-		err = c.DeleteIndex(context.Background(), "test-index")
-		require.Error(err)
-		assert.ErrorIs(err, ErrRequestFailed)
-		assert.EqualError(fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, `API key is missing or invalid for the environment "us-central1-gcp". Check that the correct environment is specified.`, 401), err.Error())
-	})
+		t.Run("Success", func(t *testing.T) {
+			assert := assert.New(t)
+			require := require.New(t)
 
-	t.Run("NotFound", func(t *testing.T) {
-		assert := assert.New(t)
-		require := require.New(t)
+			c, err := New(
+				WithAPIKey(os.Getenv(EnvTestPineconeAPIKey)),
+				WithEnvironment("us-central1-gcp"),
+			)
+			require.NoError(err)
 
-		c, err := New(
-			WithAPIKey(os.Getenv(EnvTestPineconeAPIKey)),
-			WithEnvironment("us-central1-gcp"),
-		)
-		require.NoError(err)
-
-		err = c.DeleteIndex(context.Background(), fmt.Sprintf("test-index-%d", time.Now().UnixMilli()))
-		require.Error(err)
-		assert.ErrorIs(err, ErrIndexNotFound)
+			resp, err := c.DescribeIndex(context.Background(), "test-index")
+			require.NoError(err)
+			require.NotNil(resp)
+			assert.Equal("test-index", resp.Database.Name)
+		})
 	})
 
-	t.Run("Success", func(t *testing.T) {
-		require := require.New(t)
+	t.Run("ConfigureIndex", func(t *testing.T) {
+		t.Run("Error", func(t *testing.T) {
+			assert := assert.New(t)
+			require := require.New(t)
 
-		c, err := New(
-			WithAPIKey(os.Getenv(EnvTestPineconeAPIKey)),
-			WithEnvironment("us-central1-gcp"),
-		)
-		require.NoError(err)
+			c, err := New(
+				WithAPIKey(""),
+				WithEnvironment("us-central1-gcp"),
+			)
+			require.NoError(err)
 
-		err = c.DeleteIndex(context.Background(), "test-index")
-		require.NoError(err)
+			err = c.ConfigureIndex(context.Background(), ConfigureIndexParams{
+				IndexName: "test-index",
+				Replicas:  mo.Some(2),
+			})
+			require.Error(err)
+			assert.ErrorIs(err, ErrRequestFailed)
+			assert.EqualError(fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, `API key is missing or invalid for the environment "us-central1-gcp". Check that the correct environment is specified.`, 401), err.Error())
+		})
+
+		t.Run("NotFound", func(t *testing.T) {
+			assert := assert.New(t)
+			require := require.New(t)
+
+			c, err := New(
+				WithAPIKey(os.Getenv(EnvTestPineconeAPIKey)),
+				WithEnvironment("us-central1-gcp"),
+			)
+			require.NoError(err)
+
+			err = c.ConfigureIndex(context.Background(), ConfigureIndexParams{
+				IndexName: fmt.Sprintf("test-index-%d", time.Now().UnixMilli()),
+				Replicas:  mo.Some(2),
+			})
+			require.Error(err)
+			assert.ErrorIs(err, ErrIndexNotFound)
+		})
+
+		t.Run("Success", func(t *testing.T) {
+			require := require.New(t)
+
+			c, err := New(
+				WithAPIKey(os.Getenv(EnvTestPineconeAPIKey)),
+				WithEnvironment("us-central1-gcp"),
+			)
+			require.NoError(err)
+
+			err = c.ConfigureIndex(context.Background(), ConfigureIndexParams{
+				IndexName: "test-index",
+				Replicas:  mo.Some(2),
+			})
+			require.NoError(err)
+		})
+	})
+
+	t.Run("DeleteIndex", func(t *testing.T) {
+		t.Run("Error", func(t *testing.T) {
+			assert := assert.New(t)
+			require := require.New(t)
+
+			c, err := New(
+				WithAPIKey(""),
+				WithEnvironment("us-central1-gcp"),
+			)
+			require.NoError(err)
+
+			err = c.DeleteIndex(context.Background(), "test-index")
+			require.Error(err)
+			assert.ErrorIs(err, ErrRequestFailed)
+			assert.EqualError(fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, `API key is missing or invalid for the environment "us-central1-gcp". Check that the correct environment is specified.`, 401), err.Error())
+		})
+
+		t.Run("NotFound", func(t *testing.T) {
+			assert := assert.New(t)
+			require := require.New(t)
+
+			c, err := New(
+				WithAPIKey(os.Getenv(EnvTestPineconeAPIKey)),
+				WithEnvironment("us-central1-gcp"),
+			)
+			require.NoError(err)
+
+			err = c.DeleteIndex(context.Background(), fmt.Sprintf("test-index-%d", time.Now().UnixMilli()))
+			require.Error(err)
+			assert.ErrorIs(err, ErrIndexNotFound)
+		})
+
+		t.Run("Success", func(t *testing.T) {
+			require := require.New(t)
+
+			c, err := New(
+				WithAPIKey(os.Getenv(EnvTestPineconeAPIKey)),
+				WithEnvironment("us-central1-gcp"),
+			)
+			require.NoError(err)
+
+			err = c.DeleteIndex(context.Background(), "test-index")
+			require.NoError(err)
+		})
 	})
 }
