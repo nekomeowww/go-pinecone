@@ -21,8 +21,8 @@ func NewIndexClient(opts ...CallOptions) *IndexClient {
 	}
 }
 
-func (c *IndexClient) Debug() *IndexClient {
-	c.reqClient.DebugLog = true
-	c.reqClient = c.reqClient.EnableDumpAll()
-	return c
+func (ic *IndexClient) Debug() *IndexClient {
+	ic.reqClient.DebugLog = true
+	ic.reqClient = ic.reqClient.EnableDumpAll()
+	return ic
 }
