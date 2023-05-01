@@ -14,7 +14,7 @@ func NewIndexClient(opts ...CallOptions) *IndexClient {
 	appliedOptions := applyCallOptions(opts)
 	reqClient := req.
 		C().
-		SetBaseURL(fmt.Sprintf("https://%s-%s.%s.pinecone.io", appliedOptions.indexName, appliedOptions.projectName, appliedOptions.environment)).
+		SetBaseURL(fmt.Sprintf("https://%s-%s.svc.%s.pinecone.io", appliedOptions.indexName, appliedOptions.projectName, appliedOptions.environment)).
 		SetCommonHeader("Api-Key", appliedOptions.apiKey)
 	return &IndexClient{
 		reqClient: reqClient,
