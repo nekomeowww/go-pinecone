@@ -4,6 +4,7 @@ type options struct {
 	apiKey      string
 	environment string
 	projectName string
+	indexName   string
 }
 
 type CallOptions struct {
@@ -46,6 +47,14 @@ func WithProjectName(projectName string) CallOptions {
 	return CallOptions{
 		applyFunc: func(o *options) {
 			o.projectName = projectName
+		},
+	}
+}
+
+func WithIndexName(indexName string) CallOptions {
+	return CallOptions{
+		applyFunc: func(o *options) {
+			o.indexName = indexName
 		},
 	}
 }

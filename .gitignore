@@ -41,3 +41,6 @@ temp/
 # Data
 data/*
 *.db
+
+# goland
+.idea/
