@@ -54,7 +54,7 @@ func (ic *IndexClient) UpsertVectors(ctx context.Context, params UpsertVectorsPa
 
 type UpdateVectorParams struct {
 	Values       []float32         `json:"values"`
-	SparseValues SparseValues      `json:"sparse_values"`
+	SparseValues *SparseValues     `json:"sparse_values"`
 	SetMetadata  map[string]string `json:"set_metadata"`
 	Id           string            `json:"id"`
 	Namespace    string            `json:"namespace"`
@@ -73,7 +73,10 @@ func (ic *IndexClient) UpdateVector(ctx context.Context, params UpdateVectorPara
 		return fmt.Errorf("%w: namespace is required", ErrInvalidParams)
 	}
 	if len(params.Values) == 0 {
-		return fmt.Errorf("%w: values or sparse values are required", ErrInvalidParams)
+		return fmt.Errorf("%w: values are required", ErrInvalidParams)
+	}
+	if params.SparseValues == nil && len(params.SparseValues.Indices) == 0 && len(params.SparseValues.Values) == 0 {
+		return fmt.Errorf("%w: sparse values object is required", ErrInvalidParams)
 	}
 
 	resp, err := ic.reqClient.
