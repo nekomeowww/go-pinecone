@@ -1,5 +1,13 @@
-# WIP WIP WIP WIP
-# when everything works as expected, I will release a 0.0.1, I'll probably try to have something somewhat stable by the end of the week 5/1/23
+# I'm looking to complete all of these operations before calling it done.
+
+## Vector Operations
+- [x] Query
+- [x] Update
+- [x] Upsert
+- [ ] DescribeIndexStats
+- [ ] Delete
+- [ ] Fetch
+
 
 # go-pinecone
 
