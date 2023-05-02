@@ -1,3 +1,6 @@
+# WIP WIP WIP WIP
+# when everything works as expected, I will release a 0.0.1, I'll probably try to have something somewhat stable by the end of the week 5/1/23
+
 # go-pinecone
 
 [![Go Reference](https://pkg.go.dev/badge/badge/github.com/nekomeowww/go-pinecone.svg)](https://pkg.go.dev/badge/github.com/nekomeowww/go-pinecone)
