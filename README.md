@@ -5,7 +5,7 @@
 - [x] Update
 - [x] Upsert
 - [ ] DescribeIndexStats
-- [ ] Delete
+- [x] Delete
 - [x] Fetch
 
 
