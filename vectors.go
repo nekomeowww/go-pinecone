@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"strings"
 )
 
 type Vector struct {
@@ -190,20 +189,15 @@ func (ic *IndexClient) FetchVectors(ctx context.Context, params FetchVectorsPara
 
 	var respBody FetchVectorsResponse
 
-	var urlParams string
-	for _, id := range params.Ids {
-		urlParams = strings.Join([]string{urlParams, fmt.Sprintf("&ids=%s", id)}, "")
-	}
-	if params.Namespace != "" {
-		urlParams += fmt.Sprintf("&namespace=%s", params.Namespace)
-	}
+	urlParams := joinParams(params.Ids, params.Namespace)
+
 	resp, err := ic.reqClient.
 		R().
 		SetContentType("application/json").
 		SetBody(params).
 		SetSuccessResult(&respBody).
 		SetContext(ctx).
-		Get("/vectors/fetch?")
+		Get(fmt.Sprintf("/vectors/fetch?%s", urlParams))
 	if err != nil {
 		return nil, err
 	}
@@ -216,4 +210,13 @@ func (ic *IndexClient) FetchVectors(ctx context.Context, params FetchVectorsPara
 		return nil, fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, buffer.String(), resp.StatusCode)
 	}
 	return &respBody, nil
+}
+
+func joinParams(ids []string, namespace string) string {
+	var urlParams string
+	for _, id := range ids {
+		urlParams += fmt.Sprintf("ids=%s&", id)
+	}
+	urlParams += fmt.Sprintf("namespace=%s", namespace)
+	return urlParams
 }
