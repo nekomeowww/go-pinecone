@@ -4,9 +4,9 @@
 - [x] Query
 - [x] Update
 - [x] Upsert
-- [ ] DescribeIndexStats
-- [ ] Delete
+- [x] Delete
 - [x] Fetch
+- [ ] DescribeIndexStats
 
 
 # go-pinecone
