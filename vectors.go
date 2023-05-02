@@ -14,8 +14,8 @@ type Vector struct {
 }
 
 type UpsertVectorsParams struct {
-	Vectors   []*MatchingVector `json:"vectors"`
-	Namespace string            `json:"namespace"`
+	Vectors   []*Vector `json:"vectors"`
+	Namespace string    `json:"namespace"`
 }
 
 type UpsertVectorsResponse struct {
