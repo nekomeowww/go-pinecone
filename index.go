@@ -10,7 +10,7 @@ type IndexClient struct {
 	reqClient *req.Client
 }
 
-func NewIndexClient(opts ...CallOptions) *IndexClient {
+func NewIndexClient(opts ...CallOptions) (*IndexClient, error) {
 	appliedOptions := applyCallOptions(opts)
 	reqClient := req.
 		C().
@@ -18,7 +18,7 @@ func NewIndexClient(opts ...CallOptions) *IndexClient {
 		SetCommonHeader("Api-Key", appliedOptions.apiKey)
 	return &IndexClient{
 		reqClient: reqClient,
-	}
+	}, nil
 }
 
 func (ic *IndexClient) Debug() *IndexClient {

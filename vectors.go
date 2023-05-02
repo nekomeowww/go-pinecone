@@ -179,6 +179,15 @@ type FetchedVector struct {
 	Metadata     map[string]any `json:"metadata"`
 }
 
+func joinParams(ids []string, namespace string) string {
+	var urlParams string
+	for _, id := range ids {
+		urlParams += fmt.Sprintf("ids=%s&", id)
+	}
+	urlParams += fmt.Sprintf("namespace=%s", namespace)
+	return urlParams
+}
+
 func (ic *IndexClient) FetchVectors(ctx context.Context, params FetchVectorsParams) (*FetchVectorsResponse, error) {
 	if params.Namespace == "" {
 		return nil, fmt.Errorf("%w: namespace is required", ErrInvalidParams)
@@ -210,15 +219,6 @@ func (ic *IndexClient) FetchVectors(ctx context.Context, params FetchVectorsPara
 		return nil, fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, buffer.String(), resp.StatusCode)
 	}
 	return &respBody, nil
-}
-
-func joinParams(ids []string, namespace string) string {
-	var urlParams string
-	for _, id := range ids {
-		urlParams += fmt.Sprintf("ids=%s&", id)
-	}
-	urlParams += fmt.Sprintf("namespace=%s", namespace)
-	return urlParams
 }
 
 type DeleteVectorsParams struct {
