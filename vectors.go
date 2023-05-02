@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"strings"
 )
 
 type Vector struct {
@@ -13,8 +14,8 @@ type Vector struct {
 }
 
 type UpsertVectorsParams struct {
-	Vectors   []*Vector `json:"vectors"`
-	Namespace string    `json:"namespace"`
+	Vectors   []*MatchingVector `json:"vectors"`
+	Namespace string            `json:"namespace"`
 }
 
 type UpsertVectorsResponse struct {
@@ -54,8 +55,8 @@ func (ic *IndexClient) UpsertVectors(ctx context.Context, params UpsertVectorsPa
 
 type UpdateVectorParams struct {
 	Values       []float32      `json:"values"`
-	SparseValues *SparseValues  `json:"sparse_values"`
-	SetMetadata  map[string]any `json:"set_metadata"`
+	SparseValues *SparseValues  `json:"sparseValues"`
+	SetMetadata  map[string]any `json:"setMetadata"`
 	Id           string         `json:"id"`
 	Namespace    string         `json:"namespace"`
 }
@@ -101,12 +102,12 @@ func (ic *IndexClient) UpdateVector(ctx context.Context, params UpdateVectorPara
 
 type QueryParams struct {
 	Filter          map[string]any `json:"filter"`
-	IncludeValues   bool           `json:"include_values"`
-	IncludeMetadata bool           `json:"include_metadata"`
+	IncludeValues   bool           `json:"includeValues"`
+	IncludeMetadata bool           `json:"includeMetadata"`
 	Vector          []float32      `json:"vector"`
-	SparseVector    *SparseVector  `json:"sparse_vector"`
+	SparseVector    *SparseVector  `json:"sparseVector"`
 	Namespace       string         `json:"namespace"`
-	TopK            int            `json:"top_k"`
+	TopK            int            `json:"topK"`
 	Id              string         `json:"id"`
 }
 
@@ -119,7 +120,7 @@ type MatchingVector struct {
 	Id           string         `json:"id"`
 	Values       []float32      `json:"values"`
 	Score        float32        `json:"score"`
-	SparseValues *SparseValues  `json:"sparse_values"`
+	SparseValues *SparseValues  `json:"sparseValues"`
 	Metadata     map[string]any `json:"metadata"`
 }
 
@@ -148,6 +149,61 @@ func (ic *IndexClient) Query(ctx context.Context, params QueryParams) (*QueryRes
 		SetSuccessResult(&respBody).
 		SetContext(ctx).
 		Post("/query")
+	if err != nil {
+		return nil, err
+	}
+	if !resp.IsSuccessState() {
+		buffer := new(bytes.Buffer)
+		_, err := buffer.ReadFrom(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, buffer.String(), resp.StatusCode)
+	}
+	return &respBody, nil
+}
+
+type FetchVectorsParams struct {
+	Ids       []string `json:"ids"`
+	Namespace string   `json:"namespace"`
+}
+
+type FetchVectorsResponse struct {
+	Vectors   []*FetchedVector `json:"vectors"`
+	Namespace string           `json:"namespace"`
+}
+
+type FetchedVector struct {
+	Id           string         `json:"id"`
+	Values       []float32      `json:"values"`
+	SparseValues *SparseValues  `json:"sparseValues"`
+	Metadata     map[string]any `json:"metadata"`
+}
+
+func (ic *IndexClient) FetchVectors(ctx context.Context, params FetchVectorsParams) (*FetchVectorsResponse, error) {
+	if params.Namespace == "" {
+		return nil, fmt.Errorf("%w: namespace is required", ErrInvalidParams)
+	}
+	if len(params.Ids) == 0 {
+		return nil, fmt.Errorf("%w: ids are required", ErrInvalidParams)
+	}
+
+	var respBody FetchVectorsResponse
+
+	var urlParams string
+	for _, id := range params.Ids {
+		urlParams = strings.Join([]string{urlParams, fmt.Sprintf("&ids=%s", id)}, "")
+	}
+	if params.Namespace != "" {
+		urlParams += fmt.Sprintf("&namespace=%s", params.Namespace)
+	}
+	resp, err := ic.reqClient.
+		R().
+		SetContentType("application/json").
+		SetBody(params).
+		SetSuccessResult(&respBody).
+		SetContext(ctx).
+		Get("/vectors/fetch?")
 	if err != nil {
 		return nil, err
 	}
