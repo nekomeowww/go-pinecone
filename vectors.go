@@ -220,3 +220,38 @@ func joinParams(ids []string, namespace string) string {
 	urlParams += fmt.Sprintf("namespace=%s", namespace)
 	return urlParams
 }
+
+type DeleteVectorsParams struct {
+	Ids       []string       `json:"ids"`
+	Namespace string         `json:"namespace"`
+	DeleteAll bool           `json:"deleteAll"`
+	Filter    map[string]any `json:"filter"`
+}
+
+func (ic *IndexClient) DeleteVectors(ctx context.Context, params DeleteVectorsParams) error {
+	if params.Namespace == "" {
+		return fmt.Errorf("%w: namespace is required", ErrInvalidParams)
+	}
+	if len(params.Ids) == 0 {
+		return fmt.Errorf("%w: ids is required", ErrInvalidParams)
+	}
+
+	resp, err := ic.reqClient.
+		R().
+		SetContentType("application/json").
+		SetBody(params).
+		SetContext(ctx).
+		Post("/vectors/delete")
+	if err != nil {
+		return err
+	}
+	if !resp.IsSuccessState() {
+		buffer := new(bytes.Buffer)
+		_, err := buffer.ReadFrom(resp.Body)
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, buffer.String(), resp.StatusCode)
+	}
+	return nil
+}
