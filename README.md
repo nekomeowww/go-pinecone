@@ -6,7 +6,7 @@
 - [x] Upsert
 - [ ] DescribeIndexStats
 - [ ] Delete
-- [ ] Fetch
+- [x] Fetch
 
 
 # go-pinecone
