@@ -19,7 +19,7 @@ type UpsertVectorsParams struct {
 }
 
 type UpsertVectorsResponse struct {
-	UpsertedCount int `json:"upserted_count"`
+	UpsertedCount int `json:"upsertedCount"`
 }
 
 func (ic *IndexClient) UpsertVectors(ctx context.Context, params UpsertVectorsParams) (*UpsertVectorsResponse, error) {
