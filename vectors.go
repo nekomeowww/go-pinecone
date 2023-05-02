@@ -168,8 +168,8 @@ type FetchVectorsParams struct {
 }
 
 type FetchVectorsResponse struct {
-	Vectors   []*FetchedVector `json:"vectors"`
-	Namespace string           `json:"namespace"`
+	Vectors   map[string]FetchedVector `json:"vectors"`
+	Namespace string                   `json:"namespace"`
 }
 
 type FetchedVector struct {
