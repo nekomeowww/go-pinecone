@@ -8,11 +8,11 @@ func validateQueryParams(params QueryParams) error {
 		return fmt.Errorf("%w: top k is required and must be greater than 0", ErrInvalidParams)
 	}
 
-	if params.Vector == nil && params.Id == "" {
+	if params.Vector == nil && params.ID == "" {
 		return fmt.Errorf("%w: vector or id is required", ErrInvalidParams)
 	}
 
-	if params.Vector != nil && params.Id != "" {
+	if params.Vector != nil && params.ID != "" {
 		return fmt.Errorf("%w: cannot specify both vector and id", ErrInvalidParams)
 	}
 
@@ -25,11 +25,11 @@ func validateQueryParams(params QueryParams) error {
 
 // validateDeleteVectorsParams validates the delete vectors parameters.
 func validateDeleteVectorsParams(params DeleteVectorsParams) error {
-	if params.Ids == nil && len(params.Ids) < 1 && !params.DeleteAll {
+	if (params.IDs == nil || len(params.IDs) == 0) && !params.DeleteAll {
 		return fmt.Errorf("%w: ids or deleteAll is required", ErrInvalidParams)
 	}
 
-	if params.Ids != nil && len(params.Ids) > 0 && params.DeleteAll {
+	if len(params.IDs) > 0 && params.DeleteAll {
 		return fmt.Errorf("%w: cannot specify both ids and deleteAll", ErrInvalidParams)
 	}
 
@@ -38,7 +38,7 @@ func validateDeleteVectorsParams(params DeleteVectorsParams) error {
 
 // validateFetchVectorsParams validates the fetch vectors parameters.
 func validateFetchVectorsParams(params FetchVectorsParams) error {
-	if params.Ids == nil || len(params.Ids) < 1 {
+	if params.IDs == nil || len(params.IDs) < 1 {
 		return fmt.Errorf("%w: ids is required", ErrInvalidParams)
 	}
 
@@ -47,7 +47,7 @@ func validateFetchVectorsParams(params FetchVectorsParams) error {
 
 // validateUpdateVectorParams validates the update vector parameters.
 func validateUpdateVectorParams(params UpdateVectorParams) error {
-	if params.Id == "" {
+	if params.ID == "" {
 		return fmt.Errorf("%w: id is required", ErrInvalidParams)
 	}
 
