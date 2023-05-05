@@ -6,6 +6,50 @@ import (
 	"fmt"
 )
 
+// DescribeIndexStatsParams represents the parameters for a describe index stats request.
+type DescribeIndexStatsParams struct {
+	Filter map[string]any `json:"filter"`
+}
+
+// DescribeIndexStatsResponse represents the response from a describe index stats request.
+type DescribeIndexStatsResponse struct {
+	Namespaces       map[string]*VectorCount `json:"namespaces"`
+	Dimensions       int                     `json:"dimensions"`
+	IndexFullness    float32                 `json:"index_fullness"`
+	TotalVectorCount int                     `json:"totalVectorCount"`
+}
+
+// VectorCount represents the number of vectors in a namespace.
+type VectorCount struct {
+	VectorCount int `json:"vectorCount"`
+}
+
+func (ic *IndexClient) DescribeIndexStats(ctx context.Context, params DescribeIndexStatsParams) (*DescribeIndexStatsResponse, error) {
+	var respBody DescribeIndexStatsResponse
+	resp, err := ic.reqClient.
+		R().
+		SetContentType("application/json").
+		SetBody(params).
+		SetSuccessResult(&respBody).
+		SetContext(ctx).
+		Post("/describe_index_stats")
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !resp.IsSuccessState() {
+		buffer := new(bytes.Buffer)
+		_, err := buffer.ReadFrom(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, buffer.String(), resp.StatusCode)
+	}
+
+	return &respBody, nil
+}
+
 // QueryParams represents the parameters for a query request.
 // See https://docs.pinecone.io/reference/query for more information.
 type QueryParams struct {
@@ -54,9 +98,11 @@ func (ic *IndexClient) Query(ctx context.Context, params QueryParams) (*QueryRes
 		SetSuccessResult(&respBody).
 		SetContext(ctx).
 		Post("/query")
+
 	if err != nil {
 		return nil, err
 	}
+
 	if !resp.IsSuccessState() {
 		buffer := new(bytes.Buffer)
 		_, err := buffer.ReadFrom(resp.Body)
@@ -65,6 +111,7 @@ func (ic *IndexClient) Query(ctx context.Context, params QueryParams) (*QueryRes
 		}
 		return nil, fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, buffer.String(), resp.StatusCode)
 	}
+
 	return &respBody, nil
 }
 
@@ -90,9 +137,11 @@ func (ic *IndexClient) DeleteVectors(ctx context.Context, params DeleteVectorsPa
 		SetBody(params).
 		SetContext(ctx).
 		Post("/vectors/delete")
+
 	if err != nil {
 		return err
 	}
+
 	if !resp.IsSuccessState() {
 		buffer := new(bytes.Buffer)
 		_, err := buffer.ReadFrom(resp.Body)
@@ -101,6 +150,7 @@ func (ic *IndexClient) DeleteVectors(ctx context.Context, params DeleteVectorsPa
 		}
 		return fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, buffer.String(), resp.StatusCode)
 	}
+
 	return nil
 }
 
@@ -125,16 +175,19 @@ func (ic *IndexClient) FetchVectors(ctx context.Context, params FetchVectorsPara
 
 	pathParams := buildFetchVectorPathParams(params)
 	var respBody FetchVectorsResponse
+
 	resp, err := ic.reqClient.
 		R().
 		SetContentType("application/json").
 		SetPathParams(pathParams).
 		SetSuccessResult(&respBody).
 		SetContext(ctx).
-		Get(fmt.Sprintf("/vectors/fetch"))
+		Get("/vectors/fetch")
+
 	if err != nil {
 		return nil, err
 	}
+
 	if !resp.IsSuccessState() {
 		buffer := new(bytes.Buffer)
 		_, err := buffer.ReadFrom(resp.Body)
@@ -143,6 +196,7 @@ func (ic *IndexClient) FetchVectors(ctx context.Context, params FetchVectorsPara
 		}
 		return nil, fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, buffer.String(), resp.StatusCode)
 	}
+
 	return &respBody, nil
 }
 
@@ -169,9 +223,11 @@ func (ic *IndexClient) UpdateVector(ctx context.Context, params UpdateVectorPara
 		SetBody(params).
 		SetContext(ctx).
 		Post("/vectors/update")
+
 	if err != nil {
 		return err
 	}
+
 	if !resp.IsSuccessState() {
 		buffer := new(bytes.Buffer)
 		_, err := buffer.ReadFrom(resp.Body)
@@ -180,6 +236,7 @@ func (ic *IndexClient) UpdateVector(ctx context.Context, params UpdateVectorPara
 		}
 		return fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, buffer.String(), resp.StatusCode)
 	}
+
 	return nil
 }
 
@@ -210,9 +267,11 @@ func (ic *IndexClient) UpsertVectors(ctx context.Context, params UpsertVectorsPa
 		SetSuccessResult(&respBody).
 		SetContext(ctx).
 		Post("/vectors/upsert")
+
 	if err != nil {
 		return nil, err
 	}
+
 	if !resp.IsSuccessState() {
 		buffer := new(bytes.Buffer)
 		_, err := buffer.ReadFrom(resp.Body)
@@ -221,5 +280,6 @@ func (ic *IndexClient) UpsertVectors(ctx context.Context, params UpsertVectorsPa
 		}
 		return nil, fmt.Errorf("%w: %s, status code: %d", ErrRequestFailed, buffer.String(), resp.StatusCode)
 	}
+
 	return &respBody, nil
 }

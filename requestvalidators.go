@@ -58,6 +58,7 @@ func validateUpdateVectorParams(params UpdateVectorParams) error {
 	return nil
 }
 
+// validateUpsertVectorsParams validates the upsert vectors parameters.
 func validateUpsertVectorsParams(params UpsertVectorsParams) error {
 	if params.Vectors == nil || len(params.Vectors) < 1 {
 		return fmt.Errorf("%w: vectors is required", ErrInvalidParams)
