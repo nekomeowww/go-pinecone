@@ -1,14 +1,3 @@
-# I'm looking to complete all of these operations before calling it done.
-
-## Vector Operations
-- [x] Query
-- [x] Update
-- [x] Upsert
-- [x] Delete
-- [x] Fetch
-- [ ] DescribeIndexStats
-
-
 # go-pinecone
 
 [![Go Reference](https://pkg.go.dev/badge/badge/github.com/nekomeowww/go-pinecone.svg)](https://pkg.go.dev/badge/github.com/nekomeowww/go-pinecone)
