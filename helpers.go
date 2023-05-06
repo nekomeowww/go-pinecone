@@ -7,7 +7,7 @@ import (
 // buildFetchVectorPathParams builds the fetch vector path parameters.
 // Example: ids=1&ids=2&ids=3&namespace=foo
 func buildFetchVectorPathParams(params FetchVectorsParams) string {
-	var pathParams url.Values
+	pathParams := make(url.Values)
 	for _, id := range params.IDs {
 		pathParams.Add("ids", id)
 	}
