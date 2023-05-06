@@ -1,20 +1,19 @@
 package pinecone
 
-import "fmt"
+import (
+	"net/url"
+)
 
 // buildFetchVectorPathParams builds the fetch vector path parameters.
 // Example: ids=1&ids=2&ids=3&namespace=foo
 func buildFetchVectorPathParams(params FetchVectorsParams) string {
-	var pathParams string
-	for i, id := range params.IDs {
-		if i == len(params.IDs)-1 {
-			pathParams += fmt.Sprintf("ids=%s", id)
-			break
-		}
-		pathParams += fmt.Sprintf("ids=%s&", id)
+	var pathParams url.Values
+	for _, id := range params.IDs {
+		pathParams.Add("ids", id)
 	}
 	if params.Namespace != "" {
-		pathParams += fmt.Sprintf("&namespace=%s", params.Namespace)
+		pathParams.Add("namespace", params.Namespace)
 	}
-	return pathParams
+
+	return pathParams.Encode()
 }

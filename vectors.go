@@ -14,14 +14,14 @@ type DescribeIndexStatsParams struct {
 // DescribeIndexStatsResponse represents the response from a describe index stats request.
 type DescribeIndexStatsResponse struct {
 	Namespaces       map[string]*VectorCount `json:"namespaces"`
-	Dimensions       int                     `json:"dimensions"`
-	IndexFullness    float32                 `json:"index_fullness"`
-	TotalVectorCount int                     `json:"totalVectorCount"`
+	Dimensions       int64                   `json:"dimensions"`
+	IndexFullness    float32                 `json:"indexFullness"`
+	TotalVectorCount int64                   `json:"totalVectorCount"`
 }
 
 // VectorCount represents the number of vectors in a namespace.
 type VectorCount struct {
-	VectorCount int `json:"vectorCount"`
+	VectorCount int64 `json:"vectorCount"`
 }
 
 func (ic *IndexClient) DescribeIndexStats(ctx context.Context, params DescribeIndexStatsParams) (*DescribeIndexStatsResponse, error) {
@@ -59,7 +59,7 @@ type QueryParams struct {
 	Vector          []float32      `json:"vector"`
 	SparseVector    *SparseVector  `json:"sparseVector"`
 	Namespace       string         `json:"namespace"`
-	TopK            int            `json:"topK"`
+	TopK            int64          `json:"topK"`
 	ID              string         `json:"id"`
 }
 
