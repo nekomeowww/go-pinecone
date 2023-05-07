@@ -78,7 +78,7 @@ type QueryParams struct {
 	ID              string         `json:"id"`
 }
 
-// Vector represents a scored vector.
+// QueryVector represents a scored vector.
 type QueryVector struct {
 	Vector
 	Score float32 `json:"score"`
