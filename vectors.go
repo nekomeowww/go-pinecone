@@ -6,6 +6,20 @@ import (
 	"fmt"
 )
 
+// BaseVectorResp represents a struct with shared fields for vector responses.
+type BaseVectorResp struct {
+	ID            string          `json:"id"`
+	Values        []float32       `json:"values"`
+	SparseVectors []*SparseVector `json:"sparseValues"`
+	Metadata      map[string]any  `json:"metadata"`
+}
+
+// SparseVector represents a sparse vector.
+type SparseVector struct {
+	Indices []int32   `json:"indices"`
+	Values  []float32 `json:"values"`
+}
+
 // DescribeIndexStatsParams represents the parameters for a describe index stats request.
 type DescribeIndexStatsParams struct {
 	Filter map[string]any `json:"filter"`
@@ -63,25 +77,16 @@ type QueryParams struct {
 	ID              string         `json:"id"`
 }
 
-// SparseVector represents a sparse vector.
-type SparseVector struct {
-	Indices []int32   `json:"indices"`
-	Values  []float32 `json:"values"`
-}
-
 // Vector represents a scored vector.
-type Vector struct {
-	ID           string         `json:"id"`
-	Score        float32        `json:"score,omitempty"`
-	Values       []float32      `json:"values"`
-	SparseValues *SparseVector  `json:"sparseValues,omitempty"`
-	Metadata     map[string]any `json:"metadata"`
+type QueryVector struct {
+	BaseVectorResp
+	Score float32 `json:"score"`
 }
 
 // QueryResponse represents the response from a query request.
 type QueryResponse struct {
-	Matches   []*Vector `json:"matches"`
-	Namespace string    `json:"namespace"`
+	Matches   []*QueryVector `json:"matches"`
+	Namespace string         `json:"namespace"`
 }
 
 // Query performs a query request.
@@ -162,8 +167,8 @@ type FetchVectorsParams struct {
 
 // FetchVectorsResponse represents the response from a fetch vectors request.
 type FetchVectorsResponse struct {
-	Vectors   map[string]*Vector `json:"vectors"`
-	Namespace string             `json:"namespace"`
+	Vectors   map[string]*BaseVectorResp `json:"vectors"`
+	Namespace string                     `json:"namespace"`
 }
 
 // FetchVectors performs a fetch vectors request.
@@ -239,11 +244,18 @@ func (ic *IndexClient) UpdateVector(ctx context.Context, params UpdateVectorPara
 	return nil
 }
 
+type UpsertVector struct {
+	ID           string         `json:"id"`
+	Values       []float32      `json:"values"`
+	SparseValues *SparseVector  `json:"sparseValues"`
+	Metadata     map[string]any `json:"metadata"`
+}
+
 // UpsertVectorsParams represents the parameters for an upsert vectors request.
 // See https://docs.pinecone.io/reference/upsert for more information.
 type UpsertVectorsParams struct {
-	Vectors   []*Vector `json:"vectors"`
-	Namespace string    `json:"namespace"`
+	Vectors   []*UpsertVector `json:"vectors"`
+	Namespace string          `json:"namespace"`
 }
 
 // UpsertVectorsResponse represents the response from an upsert vectors request.

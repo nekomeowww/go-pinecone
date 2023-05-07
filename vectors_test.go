@@ -230,7 +230,7 @@ func TestValidators(t *testing.T) {
 
 		t.Run("should return error if vectors is empty", func(t *testing.T) {
 			params := UpsertVectorsParams{
-				Vectors: []*Vector{},
+				Vectors: []*UpsertVector{},
 			}
 			err := validateUpsertVectorsParams(params)
 			require.Error(t, err)
@@ -241,7 +241,7 @@ func TestValidators(t *testing.T) {
 
 		t.Run("should return error if sparse vectors values and indices are not the same length", func(t *testing.T) {
 			params := UpsertVectorsParams{
-				Vectors: []*Vector{
+				Vectors: []*UpsertVector{
 					{
 						ID: "id",
 						SparseValues: &SparseVector{
@@ -260,7 +260,7 @@ func TestValidators(t *testing.T) {
 
 		t.Run("should not return error if sparse vectors values and indices are the same length", func(t *testing.T) {
 			params := UpsertVectorsParams{
-				Vectors: []*Vector{
+				Vectors: []*UpsertVector{
 					{
 						ID: "id",
 						SparseValues: &SparseVector{
@@ -276,7 +276,7 @@ func TestValidators(t *testing.T) {
 
 		t.Run("should not return error if sparse vectors values and indices are nil", func(t *testing.T) {
 			params := UpsertVectorsParams{
-				Vectors: []*Vector{
+				Vectors: []*UpsertVector{
 					{
 						ID: "id",
 						SparseValues: &SparseVector{
