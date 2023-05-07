@@ -1,4 +1,4 @@
-module github.com/aldarisbm/go-pinecone
+module github.com/nekomeowww/go-pinecone
 
 go 1.18
 
