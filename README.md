@@ -94,21 +94,74 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-
-    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-    defer cancel()
-
-    index, err := p.Index(ctx, "YOUR_INDEX_NAME")
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    // index.Close() should be called after use since
-    // the index client is backed by a gRPC connection.
-    defer index.Close()
-
-    // Do something with the index
 }
+```
+
+
+## Initialize a new Index client
+
+Vector operations are performed on a given index, we initialize a new index client like:
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	pinecone "github.com/nekomeowww/go-pinecone"
+	"log"
+)
+
+func main() {
+	client, err := pinecone.NewIndexClient(
+		pinecone.WithIndexName("YOUR_INDEX_NAME"),
+		pinecone.WithEnvironment("YOUR_ACCOUNT_REGION"),
+		pinecone.WithProjectName("YOUR_PROJECT_NAME"),
+		pinecone.WithAPIKey("YOUR_API_KEY"),
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+```
+
+To describe index stats we can use:
+
+```go
+	ctx := context.Background()
+
+	params := pinecone.DescribeIndexStatsParams{}
+	resp, err := client.DescribeIndexStats(ctx, params)
+	if err != nil {
+		panic(err)
+	}
+	for k, v := range resp.Namespaces {
+		fmt.Printf("%s: %+v\n", k, v)
+	}
+```
+
+To Upsert Vectors we do such as:
+    
+```go
+    // Use your own embedding client/library such as OpenAI embedding API
+    myVectorEmbedding := embedding.New("this is a sentence I want to embed")
+	
+    ctx := context.Background()
+    params := pinecone.UpsertVectorsParams{
+        Vectors: []*pinecone.Vector{
+            {
+                ID: "YOUR_VECTOR_ID",
+                Values: myVectorEmbedding,
+                Metadata: map[string]any{"foo": "bar"}
+            },
+        },
+    }
+    resp, err := client.UpsertVectors(ctx, params)
+    if err != nil {
+        panic(err)
+    }
+    fmt.Printf("%+v\n", resp)
 ```
 
 For a complete reference of the functions and types, please refer to the [godoc documentation](https://pkg.go.dev/github.com/nekomeowww/go-pinecone).
